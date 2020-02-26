@@ -1,20 +1,14 @@
-import assert from 'assert'
 import { MongoClient } from 'mongodb'
 
-import config from '../config'
-
-class DbClient {
-
-  static async getClient() {
-    if (this.db) {
-      return this.db
+const getDb = (dbUrl, dbName) => new Promise((resolve, reject) => {
+  MongoClient.connect(dbUrl, (err, client) => {
+    if (err) {
+      return reject(err)
     }
+    console.info('Connected to database')
+    const db = client.db(dbName)
+    resolve(db)
+  })
+})
 
-    this.db = await MongoClient.connect(config.dbUrl)
-    return this.db
-  }
-}
-
-DbClient.db = null
-
-export default DbClient
+export default { getDb }

@@ -4,9 +4,15 @@
  * Module dependencies.
  */
 
-import app from '../app'
 import debugLib from 'debug'
 import http from 'http'
+
+import app from '../app'
+import config from '../config'
+import dbClient from '../db/client'
+
+import indexRouter from '../routes/index'
+import recipesRouter from '../routes/recipes'
 
 const debug = debugLib('nice-cream-backend:server')
 
@@ -14,22 +20,41 @@ const debug = debugLib('nice-cream-backend:server')
  * Get port from environment and store in Express.
  */
 
-var port = normalizePort(process.env.PORT || '8000');
+const port = normalizePort(process.env.PORT || '8000');
 app.set('port', port);
 
 /**
  * Create HTTP server.
  */
 
-var server = http.createServer(app);
+const server = http.createServer(app);
 
 /**
  * Listen on provided port, on all network interfaces.
  */
+dbClient.getDb(config.dbUrl, config.dbName)
+  .then(db => {
+    const dbMiddleware = (req, res, next) => {
+      req.db = db
+      next()
+    }
+    app.use(dbMiddleware)
+    initializeRoutes(app)
+    
+    server.listen(port)
+    server.on('error', onError)
+    server.on('listening', onListening)
+  })
+  .catch(err => {
+    console.error(`An error occurred: ${err}`)
+    process.exit(1)
+  })
 
-server.listen(port);
-server.on('error', onError);
-server.on('listening', onListening);
+
+const initializeRoutes = _app => {
+  _app.use('/', indexRouter)
+  _app.use('/recipes', recipesRouter)
+}
 
 /**
  * Normalize a port into a number, string, or false.
