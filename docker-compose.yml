@@ -1,0 +1,22 @@
+version: "3.7"
+services:
+  database:
+    container_name: database
+    image: "mongo:4.2-bionic"
+    ports:
+      - "27017:27017"
+  backend:
+    container_name: backend
+    image: "node:12"
+    command: npm run watch
+    working_dir: /app
+    volumes:
+      - type: bind
+        source: .
+        target: /app
+    expose:
+      - "8000"
+    ports:
+      - "8000:8000"
+    depends_on:
+      - database

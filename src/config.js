@@ -10,7 +10,7 @@ switch(process.env.NODE_ENV || 'development') {
     break
   default:
     dbName = 'niceCream'
-    dbUrl = 'mongodb://localhost:27017'
+    dbUrl = 'mongodb://database:27017'
     break
 }
 
